@@ -28,9 +28,10 @@ if [ "${CMAKE_CMD}" = "" ]; then
 fi
 
 BUILD_TYPE="Debug"
-PREFIX=/usr/local
+PREFIX=./build
 LIBDIR=
 CMAKE_ARGS=
+GRPC_INSTALL=false
 
 if [ -e "${TOP_SRCDIR}/.configure-custom.sh" ]; then
     . "${TOP_SRCDIR}/.configure-custom.sh"
@@ -90,6 +91,8 @@ set_config_var() {
         else
             CMAKE_ARGS="$CMAKE_ARGS -D${VAR_UC_NAME}=$(quote "${VAR_VALUE}")"
         fi
+    elif [ "${1}" = '--disable-option-checking' ]; then
+        echo "Ignoring $name"
     else
         echo "Unknown parameter: ${1}"
         exit 1
@@ -179,10 +182,8 @@ EOF
 
 while [ $# != 0 ]; do
     case "$1" in
-        "--prefix="*)
-            PREFIX="${1#*=}";;
-        "--prefix")
-            PREFIX="${2}"; shift;;
+        "--prefix"*)
+            CMAKE_ARGS ;;
         "--bindir="*)
             CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_INSTALL_BINDIR=$(quote "${1#*=}")";;
         "--bindir")
@@ -294,6 +295,12 @@ while [ $# != 0 ]; do
             esac
             ;;
 
+        "--cache-file"*)
+            echo "Ignoring --cache-file"
+            ;;
+        "--srcdir"*)
+            echo "Ignoring --srcdir"
+            ;;
         *)
             echo "$0: error: unrecognized option: \`$1'" >&2
             echo "Try \`$0 --help' for more information" >&2
@@ -314,4 +321,6 @@ if [ "x${LDFLAGS}" != "x" ]; then
     done
 fi
 
-eval "${CMAKE_CMD}" "${TOP_SRCDIR}" -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" -DCMAKE_INSTALL_PREFIX="${PREFIX}" -DCMAKE_INSTALL_LIBDIR="${LIBDIR}" ${CMAKE_ARGS}
+echo "Calling final eval"
+
+eval "${CMAKE_CMD}" "${TOP_SRCDIR}" -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" -DCMAKE_INSTALL_PREFIX="build-grpc" -DCMAKE_INSTALL_LIBDIR="build-grpc" -DCMAKE_INSTALL_CMAKEDIR="install-grpc" ${CMAKE_ARGS}
