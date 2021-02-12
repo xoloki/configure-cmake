@@ -95,7 +95,6 @@ set_config_var() {
         echo "Ignoring $name"
     else
         echo "Unknown parameter: ${1}"
-        exit 1
     fi
 }
 
@@ -183,7 +182,7 @@ EOF
 while [ $# != 0 ]; do
     case "$1" in
         "--prefix"*)
-            CMAKE_ARGS ;;
+            CMAKE_ARGS='' ;;
         "--bindir="*)
             CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_INSTALL_BINDIR=$(quote "${1#*=}")";;
         "--bindir")
